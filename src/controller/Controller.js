@@ -1,3 +1,5 @@
+const converteIds = require('../utils/conversorDeStringHelper.js');
+
 class Controller {
   constructor(service) {
     this.service = service;
@@ -22,6 +24,17 @@ class Controller {
     }
   }
 
+  async pegaUm(req, res) {
+    try {
+      const { ...params } = req.params;
+      const where = converteIds(params);
+      const registro = await this.service.pegaUmRegistro(where);
+      return res.status(200).json(registro);
+    } catch (erro) {
+      res.status(500).json({ mensagem: `Ocorreu um erro: ${erro.message}` });
+    }
+  }
+
   async cria(req, res) {
     try {
       const dados = req.body;
@@ -34,9 +47,10 @@ class Controller {
 
   async atualiza(req, res) {
     try {
-      const { id } = req.params;
+      const { ...params } = req.params;
+      const where = converteIds(params);
       const dados = req.body;
-      const foiAtualizado = await this.service.atualizaUmRegistro(dados, Number(id));
+      const foiAtualizado = await this.service.atualizaUmRegistro(dados, where);
       if (!foiAtualizado) {
         return res.status(404).json({ mensagem: 'Registro não encontrado' });
       }
